@@ -1,7 +1,9 @@
 const { json } = require("express");
 const express = require("express");
 const cors = require("cors");
-const db = require("./lib/db");
+const mongoose = require("mongoose");
+const Post = require("./models/post");
+const Comment = require("./models/comment");
 
 /*
   We create an express app calling
@@ -25,14 +27,14 @@ app.use((req, res, next) => {
   Endpoint to handle GET requests to the root URI "/"
 */
 app.get("/posts", (req, res) => {
-  db.findAll().then((posts) => {
+  Post.find().then((posts) => {
     res.status(200);
     res.json(posts);
   });
 });
 
 app.post("/posts", (req, res) => {
-  db.insert(req.body)
+  Post.create(req.body)
     .then((newPost) => {
       console.log(newPost);
       res.status(201);
@@ -46,9 +48,24 @@ app.post("/posts", (req, res) => {
     });
 });
 
+app.post("/comments", (req, res) => {
+  Comment.create(req.body)
+    .then((newComment) => {
+      console.log(newComment);
+      res.status(201);
+      res.json(newComment);
+    })
+    .catch((error) => {
+      res.status(500);
+      res.json({
+        error: `Internal Error: ${error}`,
+      });
+    });
+});
+
 app.get("/posts/:id", (req, res) => {
   const { id } = req.params;
-  db.findById(id)
+  Post.findById(id)
     .then((post) => {
       res.status(200);
       res.json(post);
@@ -63,7 +80,7 @@ app.get("/posts/:id", (req, res) => {
 
 app.patch("/posts/:id", (req, res) => {
   const { id } = req.params;
-  db.updateById(id, req.body)
+  Post.findByIdAndUpdate(id, req.body)
     .then((updatedPost) => {
       if (updatedPost) {
         res.status(200);
@@ -85,7 +102,7 @@ app.patch("/posts/:id", (req, res) => {
 
 app.delete("/posts/:id", (req, res) => {
   const { id } = req.params;
-  db.deleteById(id)
+  Post.findByIdAndDelete(id)
     .then((post) => {
       res.status(204);
       res.json(post);
@@ -103,6 +120,16 @@ app.delete("/posts/:id", (req, res) => {
   We have to start the server. We make it listen on the port 4000
 
 */
-app.listen(4000, () => {
-  console.log("Listening on http://localhost:4000");
+
+mongoose.connect("mongodb://localhost/blogs", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const mongodb = mongoose.connection;
+
+mongodb.on("open", () => {
+  app.listen(4000, () => {
+    console.log("Listening on http://localhost:4000");
+  });
 });
