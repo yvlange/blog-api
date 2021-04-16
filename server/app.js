@@ -80,7 +80,7 @@ app.get("/posts/:id", (req, res) => {
 
 app.patch("/posts/:id", (req, res) => {
   const { id } = req.params;
-  Post.findByIdAndUpdate(id, req.body)
+  Post.findByIdAndUpdate(id, req.body, { new: true })
     .then((updatedPost) => {
       if (updatedPost) {
         res.status(200);
