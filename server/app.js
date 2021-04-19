@@ -1,4 +1,4 @@
-const { json } = require("express");
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -121,6 +121,8 @@ app.delete("/posts/:id", (req, res) => {
 
 */
 
+const { PORT } = process.env;
+
 mongoose.connect("mongodb://localhost/blogs", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -129,7 +131,7 @@ mongoose.connect("mongodb://localhost/blogs", {
 const mongodb = mongoose.connection;
 
 mongodb.on("open", () => {
-  app.listen(4000, () => {
-    console.log("Listening on http://localhost:4000");
+  app.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}`);
   });
 });
